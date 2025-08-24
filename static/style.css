@@ -6,12 +6,26 @@ body {
   padding-top: 40px;
 }
 .chat-container {
-  width: 80%;
-  max-width: 700px;
+  width: 90%;
+  max-width: 1000px;
+  display: flex;
+  gap: 20px;
+}
+.chat-main {
+  flex: 2;
   background: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.side-panel {
+  flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-height: 600px;
+  overflow-y: auto;
 }
 .history {
   max-height: 400px;
@@ -30,6 +44,9 @@ body {
   background: #e8f5e9;
 }
 .model-form {
+  margin-bottom: 10px;
+}
+.mode-form {
   margin-bottom: 10px;
 }
 .input-form {
@@ -56,6 +73,17 @@ body {
   margin-top: 10px;
   font-size: 0.9em;
   color: #555;
+}
+.system-prompt {
+  white-space: pre-wrap;
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.prompt-form textarea {
+  width: 100%;
 }
 .placeholder {
   color: #777;

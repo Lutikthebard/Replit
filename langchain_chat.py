@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Tuple
 
-from langchain.schema import HumanMessage, AIMessage
+from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from langchain_community.callbacks.manager import get_openai_callback
 try:
     from langchain_openai import ChatOpenAI
@@ -35,6 +35,16 @@ class ChatHandler:
         self.llm = self._load_model()
         self.history: List[Dict[str, str]] = self._load_history()
         self.token_usage: Dict[str, int] = {"read": 0, "created": 0, "cache": 0}
+        self.system_prompt_template: str = self.config.get(
+            "system_prompt_template",
+            (
+                "Given the conversation history and the user's question, "
+                "write a concise system prompt describing the expert who should answer."
+                "\nHistory:\n{history}\nQuestion: {question}\nSystem prompt:"
+            ),
+        )
+        self.use_expert_mode: bool = False
+        self.last_system_prompt: str = ""
 
     def _load_model(self):
         model_name = self.current_model
@@ -72,12 +82,30 @@ class ChatHandler:
             HumanMessage(m["content"]) if m["role"] == "user" else AIMessage(m["content"])
             for m in self.history
         ]
+        system_messages: List[SystemMessage] = []
+        if self.use_expert_mode:
+            history_text = "\n".join(
+                f"{m['role']}: {m['content']}" for m in self.history
+            )
+            prompt_text = self.system_prompt_template.format(
+                history=history_text, question=user_input
+            )
+            system_response = self.llm.invoke([HumanMessage(prompt_text)])
+            self.last_system_prompt = system_response.content.strip()
+            system_messages = [SystemMessage(self.last_system_prompt)]
+        else:
+            self.last_system_prompt = ""
+        full_messages = system_messages + messages
         if self.provider == "openai":
             with get_openai_callback() as cb:
-                response = self.llm.invoke(messages)
-            read, created, cache = cb.prompt_tokens, cb.completion_tokens, cb.prompt_tokens_cached
+                response = self.llm.invoke(full_messages)
+            read, created, cache = (
+                cb.prompt_tokens,
+                cb.completion_tokens,
+                cb.prompt_tokens_cached,
+            )
         else:
-            response = self.llm.invoke(messages)
+            response = self.llm.invoke(full_messages)
             read, created, cache = self._extract_usage(response)
         self.token_usage["read"] += read
         self.token_usage["created"] += created
@@ -113,3 +141,8 @@ class ChatHandler:
         self.history = []
         self.token_usage = {"read": 0, "created": 0, "cache": 0}
         self._save_history()
+
+    def set_system_prompt_template(self, template: str) -> None:
+        self.system_prompt_template = template
+        self.config["system_prompt_template"] = template
+        CONFIG_PATH.write_text(json.dumps(self.config, indent=2))
