@@ -36,8 +36,8 @@
       "claude-3-haiku-20240307"
     ]
   },
-  "openai_api_key": "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",
-  "gemini_api_key": "AIzaSyDLddhBEXXK48dYcYj2fF4B58mZNaCSZdQ #AIzaSyARxdZa8AvLUoQ7m4ld9sSI-IPlyrpdCX8",
+  "openai_api_key": "",
+  "gemini_api_key": "",
   "anthropic_api_key": "",
   "system_prompt_template": "Given the conversation history and the user's question, write a concise system prompt describing the expert who should answer.\nHistory:\n{history}\nQuestion: {question}\nSystem prompt:"
 }
