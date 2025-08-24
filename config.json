@@ -7,5 +7,6 @@
   },
   "openai_api_key": "YOUR_OPENAI_KEY",
   "gemini_api_key": "YOUR_GEMINI_KEY",
-  "anthropic_api_key": "YOUR_ANTHROPIC_KEY"
+  "anthropic_api_key": "YOUR_ANTHROPIC_KEY",
+  "system_prompt_template": "Given the conversation history and the user's question, write a concise system prompt describing the expert who should answer.\nHistory:\n{history}\nQuestion: {question}\nSystem prompt:"
 }

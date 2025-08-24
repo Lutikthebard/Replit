@@ -19,6 +19,9 @@ def index():
         models=chat_handler.available_models(),
         current_model=chat_handler.current_model,
         tokens=chat_handler.token_usage,
+        expert_mode=chat_handler.use_expert_mode,
+        system_prompt=chat_handler.last_system_prompt,
+        system_prompt_template=chat_handler.system_prompt_template,
     )
 
 
@@ -33,6 +36,20 @@ def set_model():
     model = request.form.get("model")
     if model:
         chat_handler.set_model(model)
+    return redirect(url_for("index"))
+
+
+@app.route("/toggle_mode", methods=["POST"])
+def toggle_mode():
+    chat_handler.use_expert_mode = request.form.get("expert_mode") == "true"
+    return redirect(url_for("index"))
+
+
+@app.route("/set_prompt", methods=["POST"])
+def set_prompt():
+    prompt = request.form.get("prompt_template")
+    if prompt is not None:
+        chat_handler.set_system_prompt_template(prompt)
     return redirect(url_for("index"))
 
 
