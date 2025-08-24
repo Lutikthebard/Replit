@@ -16,7 +16,7 @@
       <form method="post" action="{{ url_for('set_model') }}" class="model-form">
         <select name="model">
           {% for m in models %}
-            <option value="{{ m }}" {% if m == current_model %}selected{% endif %}>{{ m }}</option>
+            <option value="{{ m }}" {% if m == current_model %}selected{% endif %}>{{ m }} ({{ model_provider[m] }})</option>
           {% endfor %}
         </select>
         <button type="submit">Switch</button>

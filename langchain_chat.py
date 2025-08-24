@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from langchain_community.callbacks.manager import get_openai_callback
@@ -25,13 +25,21 @@ class ChatHandler:
     """Handle conversation state and model selection."""
 
     def __init__(self) -> None:
-        self.config: Dict[str, str] = json.loads(CONFIG_PATH.read_text())
-        self.models: Dict[str, str] = self.config.get("models", {})
-        self.model_provider: Dict[str, str] = {
-            model: prov for prov, model in self.models.items()
-        }
+        self.config: Dict[str, Any] = json.loads(CONFIG_PATH.read_text())
+        raw_models: Dict[str, Any] = self.config.get("models", {})
+        # Ensure each provider maps to a list of models
+        self.models: Dict[str, List[str]] = {}
+        self.model_provider: Dict[str, str] = {}
+        for prov, models in raw_models.items():
+            model_list = models if isinstance(models, list) else [models]
+            self.models[prov] = model_list
+            for m in model_list:
+                self.model_provider[m] = prov
         self.provider: str = self.config.get("provider", "openai")
-        self.current_model: str = self.models.get(self.provider, "")
+        provider_models = self.models.get(self.provider)
+        if not provider_models:
+            raise ValueError(f"No models configured for provider: {self.provider}")
+        self.current_model: str = provider_models[0]
         self.llm = self._load_model()
         self.history: List[Dict[str, str]] = self._load_history()
         self.token_usage: Dict[str, int] = {"read": 0, "created": 0, "cache": 0}
@@ -127,7 +135,7 @@ class ChatHandler:
         return read, created, cache
 
     def available_models(self) -> List[str]:
-        return list(self.model_provider.keys())
+        return [m for models in self.models.values() for m in models]
 
     def set_model(self, model_name: str) -> None:
         provider = self.model_provider.get(model_name)
