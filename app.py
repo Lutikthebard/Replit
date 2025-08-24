@@ -41,7 +41,7 @@ def set_model():
 
 @app.route("/toggle_mode", methods=["POST"])
 def toggle_mode():
-    chat_handler.use_expert_mode = request.form.get("expert_mode") == "true"
+    chat_handler.use_expert_mode = "true" in request.form.getlist("expert_mode")
     return redirect(url_for("index"))
 
 
