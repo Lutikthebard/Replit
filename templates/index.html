@@ -6,6 +6,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <p id="loading-text">Processing...</p>
+  </div>
   <div class="chat-container">
     <div class="chat-main">
       <h1>LangChain Chat ({{ provider }} - {{ current_model }})</h1>
@@ -52,5 +56,6 @@
       </form>
     </div>
   </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
