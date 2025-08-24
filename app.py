@@ -8,11 +8,21 @@ chat_handler = ChatHandler()
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        user_message = request.form.get("message", "")
+        selected_model = request.form.get("model")
+        if selected_model and selected_model != chat_handler.model:
+            chat_handler.set_model(selected_model)
+        user_message = request.form.get("message", "").strip()
         if user_message:
             chat_handler.chat(user_message)
         return redirect(url_for("index"))
-    return render_template("index.html", history=chat_handler.history, provider=chat_handler.provider)
+    return render_template(
+        "index.html",
+        history=chat_handler.history,
+        provider=chat_handler.provider,
+        model=chat_handler.model,
+        models=chat_handler.available_models,
+        tokens=chat_handler.token_counts,
+    )
 
 
 @app.route("/reset")

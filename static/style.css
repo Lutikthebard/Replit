@@ -33,6 +33,9 @@ body {
   display: flex;
   gap: 10px;
 }
+.input-form select {
+  padding: 8px;
+}
 .input-form input[type="text"] {
   flex: 1;
   padding: 8px;
@@ -48,6 +51,11 @@ body {
 }
 .input-form .reset {
   background: #9e9e9e;
+}
+.tokens {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #555;
 }
 .placeholder {
   color: #777;

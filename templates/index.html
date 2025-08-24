@@ -18,10 +18,18 @@
       {% endfor %}
     </div>
     <form method="post" class="input-form">
-      <input type="text" name="message" placeholder="Type your message" required />
+      <select name="model" onchange="this.form.submit()">
+        {% for m in models %}
+          <option value="{{ m }}" {% if m == model %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="message" placeholder="Type your message" />
       <button type="submit">Send</button>
-      <a class="reset" href="{{ url_for('reset') }}">Reset</a>
+      <button type="button" class="reset" onclick="location.href='{{ url_for('reset') }}'">Reset</button>
     </form>
+    <div class="tokens">
+      Tokens - Read: {{ tokens.read }}, Created: {{ tokens.created }}, Cache: {{ tokens.cache }}
+    </div>
   </div>
 </body>
 </html>

@@ -4,7 +4,8 @@ This project provides a minimal Flask web interface backed by [LangChain](https:
 
 ## Features
 
-- Switch between OpenAI, Gemini, or Anthropic models via `config.json`.
+- Select a model from the web UI; the provider is chosen automatically.
+- Token usage display for each response (read, created, cache).
 - Conversation history stored in `history.json` with ability to reset.
 - Simple responsive user interface built with Flask templates.
 
@@ -16,7 +17,21 @@ This project provides a minimal Flask web interface backed by [LangChain](https:
 pip install -r requirements.txt
 ```
 
-2. Edit `config.json` with your API keys and desired provider.
+2. Edit `config.json` with your API keys, desired provider, and model names. Models are grouped by provider under a `models` mapping, and all listed models will appear in the UI:
+
+```json
+{ 
+  "provider": "openai",
+  "models": {
+    "openai": ["gpt-4o-mini", "gpt-4o"],
+    "gemini": ["gemini-pro"],
+    "anthropic": ["claude-3-haiku"]
+  },
+  "openai_api_key": "YOUR_OPENAI_KEY",
+  "gemini_api_key": "YOUR_GEMINI_KEY",
+  "anthropic_api_key": "YOUR_ANTHROPIC_KEY"
+}
+```
 
 3. Run the application:
 
@@ -28,4 +43,4 @@ Then open `http://localhost:5000` in your browser to start chatting.
 
 ## Resetting Conversation
 
-Use the **Reset** link on the page to clear stored chat history.
+Use the **Reset** button on the page to clear stored chat history.
