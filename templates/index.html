@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain Chat</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="chat-container">
+    <h1>LangChain Chat ({{ provider }})</h1>
+    <div class="history">
+      {% for msg in history %}
+        <div class="message {{ msg.role }}">
+          <strong>{{ msg.role }}:</strong> {{ msg.content }}
+        </div>
+      {% else %}
+        <p class="placeholder">No conversation yet.</p>
+      {% endfor %}
+    </div>
+    <form method="post" class="input-form">
+      <input type="text" name="message" placeholder="Type your message" required />
+      <button type="submit">Send</button>
+      <a class="reset" href="{{ url_for('reset') }}">Reset</a>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+flask
+langchain
+langchain-openai
+langchain-google-genai
+langchain-anthropic
+openai
+anthropic
+google-generativeai
