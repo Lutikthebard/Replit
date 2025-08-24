@@ -17,6 +17,7 @@ def index():
         history=chat_handler.history,
         provider=chat_handler.provider,
         models=chat_handler.available_models(),
+        model_provider=chat_handler.model_provider,
         current_model=chat_handler.current_model,
         tokens=chat_handler.token_usage,
         expert_mode=chat_handler.use_expert_mode,
