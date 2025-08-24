@@ -30,15 +30,24 @@ class ChatHandler:
         self.history: List[Dict[str, str]] = self._load_history()
 
     def _load_model(self):
+        models = self.config.get("models", {})
+        model_name = models.get(self.provider)
+        if not model_name:
+            raise ValueError(f"Model not specified for provider: {self.provider}")
+
         if self.provider == "openai":
-            return ChatOpenAI(openai_api_key=self.config.get("openai_api_key"))
+            return ChatOpenAI(
+                model=model_name,
+                openai_api_key=self.config.get("openai_api_key"),
+            )
         if self.provider == "gemini" and ChatGoogleGenerativeAI is not None:
             return ChatGoogleGenerativeAI(
                 google_api_key=self.config.get("gemini_api_key"),
-                model="gemini-pro",
+                model=model_name,
             )
         if self.provider == "anthropic":
             return ChatAnthropic(
+                model=model_name,
                 anthropic_api_key=self.config.get("anthropic_api_key"),
             )
         raise ValueError(f"Unsupported provider: {self.provider}")
