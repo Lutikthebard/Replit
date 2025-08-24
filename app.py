@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from langchain_chat import ChatHandler
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 chat_handler = ChatHandler()

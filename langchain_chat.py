@@ -21,6 +21,8 @@ except ImportError:
 CONFIG_PATH = Path("config.json")
 HISTORY_PATH = Path("history.json")
 
+logger = logging.getLogger(__name__)
+
 
 class ChatHandler:
     """Handle conversation state and model selection."""
@@ -42,6 +44,7 @@ class ChatHandler:
             raise ValueError(f"No models configured for provider: {self.provider}")
         self.current_model: str = provider_models[0]
         self.llm = self._load_model()
+        logger.info("Initialized ChatHandler with provider %s and model %s", self.provider, self.current_model)
         self.history: List[Dict[str, str]] = self._load_history()
         self.token_usage: Dict[str, int] = {"read": 0, "created": 0, "cache": 0}
         self.system_prompt_template: str = self.config.get(
@@ -59,7 +62,7 @@ class ChatHandler:
         model_name = self.current_model
         if not model_name:
             raise ValueError(f"Model not specified for provider: {self.provider}")
-
+        logger.info("Loading model %s for provider %s", model_name, self.provider)
         if self.provider == "openai":
             return ChatOpenAI(
                 model=model_name,
@@ -102,12 +105,21 @@ class ChatHandler:
                 prompt_text = self.system_prompt_template.format(
                     history=history_text, question=user_input
                 )
+                logger.info(
+                    "Generating system prompt with %s/%s", self.provider, self.current_model
+                )
                 system_response = self.llm.invoke([HumanMessage(prompt_text)])
                 self.last_system_prompt = system_response.content.strip()
                 system_messages = [SystemMessage(self.last_system_prompt)]
             else:
                 self.last_system_prompt = ""
             full_messages = system_messages + messages
+            logger.info(
+                "Invoking LLM %s/%s with %d messages",
+                self.provider,
+                self.current_model,
+                len(full_messages),
+            )
             if self.provider == "openai":
                 with get_openai_callback() as cb:
                     response = self.llm.invoke(full_messages)
@@ -119,6 +131,12 @@ class ChatHandler:
             else:
                 response = self.llm.invoke(full_messages)
                 read, created, cache = self._extract_usage(response)
+            logger.info(
+                "LLM response received with usage read=%d created=%d cache=%d",
+                read,
+                created,
+                cache,
+            )
             self.token_usage["read"] += read
             self.token_usage["created"] += created
             self.token_usage["cache"] += cache
@@ -126,7 +144,7 @@ class ChatHandler:
             self._save_history()
             return response.content
         except Exception as e:  # noqa: BLE001
-            logging.exception("Chat invocation failed")
+            logger.exception("Chat invocation failed")
             error_msg = f"{type(e).__name__}: {e}"
             self.history.append({"role": "error", "content": error_msg})
             self._save_history()
@@ -151,6 +169,7 @@ class ChatHandler:
         provider = self.model_provider.get(model_name)
         if not provider:
             raise ValueError(f"Unknown model: {model_name}")
+        logger.info("Switching to model %s (provider %s)", model_name, provider)
         self.provider = provider
         self.current_model = model_name
         self.llm = self._load_model()
