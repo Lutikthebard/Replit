@@ -3,6 +3,7 @@ langchain
 langchain-openai
 langchain-google-genai
 langchain-anthropic
+langchain-community
 openai
 anthropic
 google-generativeai

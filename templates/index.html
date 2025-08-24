@@ -7,7 +7,15 @@
 </head>
 <body>
   <div class="chat-container">
-    <h1>LangChain Chat ({{ provider }})</h1>
+    <h1>LangChain Chat ({{ provider }} - {{ current_model }})</h1>
+    <form method="post" action="{{ url_for('set_model') }}" class="model-form">
+      <select name="model">
+        {% for m in models %}
+          <option value="{{ m }}" {% if m == current_model %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Switch</button>
+    </form>
     <div class="history">
       {% for msg in history %}
         <div class="message {{ msg.role }}">
@@ -20,8 +28,11 @@
     <form method="post" class="input-form">
       <input type="text" name="message" placeholder="Type your message" required />
       <button type="submit">Send</button>
-      <a class="reset" href="{{ url_for('reset') }}">Reset</a>
+      <a class="reset" href="{{ url_for('reset') }}">Reset History</a>
     </form>
+    <div class="tokens">
+      Tokens - Read: {{ tokens.read }}, Created: {{ tokens.created }}, Cache: {{ tokens.cache }}
+    </div>
   </div>
 </body>
 </html>

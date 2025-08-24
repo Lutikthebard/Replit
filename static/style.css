@@ -29,6 +29,9 @@ body {
 .message.assistant {
   background: #e8f5e9;
 }
+.model-form {
+  margin-bottom: 10px;
+}
 .input-form {
   display: flex;
   gap: 10px;
@@ -48,6 +51,11 @@ body {
 }
 .input-form .reset {
   background: #9e9e9e;
+}
+.tokens {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #555;
 }
 .placeholder {
   color: #777;
