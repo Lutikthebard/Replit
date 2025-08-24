@@ -16,7 +16,21 @@ This project provides a minimal Flask web interface backed by [LangChain](https:
 pip install -r requirements.txt
 ```
 
-2. Edit `config.json` with your API keys and desired provider.
+2. Edit `config.json` with your API keys, desired provider, and model names. Each provider's model is specified under a `models` mapping:
+
+```json
+{
+  "provider": "openai",
+  "models": {
+    "openai": "gpt-4o-mini",
+    "gemini": "gemini-pro",
+    "anthropic": "claude-3-haiku"
+  },
+  "openai_api_key": "YOUR_OPENAI_KEY",
+  "gemini_api_key": "YOUR_GEMINI_KEY",
+  "anthropic_api_key": "YOUR_ANTHROPIC_KEY"
+}
+```
 
 3. Run the application:
 
