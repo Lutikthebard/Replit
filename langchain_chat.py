@@ -1,6 +1,7 @@
 import json
+import logging
 from pathlib import Path
-from typing import List, Dict, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from langchain_community.callbacks.manager import get_openai_callback
@@ -86,41 +87,50 @@ class ChatHandler:
 
     def chat(self, user_input: str) -> str:
         self.history.append({"role": "user", "content": user_input})
-        messages = [
-            HumanMessage(m["content"]) if m["role"] == "user" else AIMessage(m["content"])
-            for m in self.history
-        ]
+        messages: List[Any] = []
+        for m in self.history:
+            if m["role"] == "user":
+                messages.append(HumanMessage(m["content"]))
+            elif m["role"] == "assistant":
+                messages.append(AIMessage(m["content"]))
         system_messages: List[SystemMessage] = []
-        if self.use_expert_mode:
-            history_text = "\n".join(
-                f"{m['role']}: {m['content']}" for m in self.history
-            )
-            prompt_text = self.system_prompt_template.format(
-                history=history_text, question=user_input
-            )
-            system_response = self.llm.invoke([HumanMessage(prompt_text)])
-            self.last_system_prompt = system_response.content.strip()
-            system_messages = [SystemMessage(self.last_system_prompt)]
-        else:
-            self.last_system_prompt = ""
-        full_messages = system_messages + messages
-        if self.provider == "openai":
-            with get_openai_callback() as cb:
+        try:
+            if self.use_expert_mode:
+                history_text = "\n".join(
+                    f"{m['role']}: {m['content']}" for m in self.history
+                )
+                prompt_text = self.system_prompt_template.format(
+                    history=history_text, question=user_input
+                )
+                system_response = self.llm.invoke([HumanMessage(prompt_text)])
+                self.last_system_prompt = system_response.content.strip()
+                system_messages = [SystemMessage(self.last_system_prompt)]
+            else:
+                self.last_system_prompt = ""
+            full_messages = system_messages + messages
+            if self.provider == "openai":
+                with get_openai_callback() as cb:
+                    response = self.llm.invoke(full_messages)
+                read, created, cache = (
+                    cb.prompt_tokens,
+                    cb.completion_tokens,
+                    cb.prompt_tokens_cached,
+                )
+            else:
                 response = self.llm.invoke(full_messages)
-            read, created, cache = (
-                cb.prompt_tokens,
-                cb.completion_tokens,
-                cb.prompt_tokens_cached,
-            )
-        else:
-            response = self.llm.invoke(full_messages)
-            read, created, cache = self._extract_usage(response)
-        self.token_usage["read"] += read
-        self.token_usage["created"] += created
-        self.token_usage["cache"] += cache
-        self.history.append({"role": "assistant", "content": response.content})
-        self._save_history()
-        return response.content
+                read, created, cache = self._extract_usage(response)
+            self.token_usage["read"] += read
+            self.token_usage["created"] += created
+            self.token_usage["cache"] += cache
+            self.history.append({"role": "assistant", "content": response.content})
+            self._save_history()
+            return response.content
+        except Exception as e:  # noqa: BLE001
+            logging.exception("Chat invocation failed")
+            error_msg = f"{type(e).__name__}: {e}"
+            self.history.append({"role": "error", "content": error_msg})
+            self._save_history()
+            return error_msg
 
     def _extract_usage(self, response) -> Tuple[int, int, int]:
         metadata = getattr(response, "response_metadata", {})

@@ -43,6 +43,10 @@ body {
 .message.assistant {
   background: #e8f5e9;
 }
+.message.error {
+  background: #ffebee;
+  color: #b71c1c;
+}
 .model-form {
   margin-bottom: 10px;
 }
