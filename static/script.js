@@ -9,7 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', () => {
     overlay.classList.remove('hidden');
     if (sendButton) sendButton.disabled = true;
-    if (messageInput) messageInput.disabled = true;
+    // Keep the message input enabled during submission so its value is sent
+    // Disable it asynchronously once the submission has started
+    if (messageInput) {
+      setTimeout(() => {
+        messageInput.disabled = true;
+      }, 0);
+    }
     if (loadingText) {
       if (expertCheckbox && expertCheckbox.checked) {
         loadingText.textContent = 'Creating expert prompt...';
